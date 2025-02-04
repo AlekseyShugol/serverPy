@@ -1,0 +1,8 @@
+{
+    "host": "192.168.109.41",
+    "port_sender": 8000,
+    "port_saver": 8001,
+    "res_directory": "res",
+    "html_directory": "public",
+    "max_size_gigabytes": 2
+}
