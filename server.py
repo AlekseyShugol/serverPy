@@ -32,11 +32,19 @@ class Server:
         self._html_directory = os.path.abspath(config_file['html_directory'])
         self._res_directory = os.path.abspath(config_file['res_directory'])
         self._max_size_gigabytes = config_file['max_size_gigabytes']
+        self._version = config_file['version']
+        self._log_directory = os.path.abspath(config_file['log_directory'])
         self.MAX_REQUEST_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
         self.MAX_FILE_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
-        self._check_folders(self._res_directory,self._html_directory)
+        self._check_folders(self._res_directory,self._html_directory,self._log_directory)
 
-    def _check_folders(self, res_path, html_path):
+    def _log(self, content):
+        today = datetime.date.today().strftime("%d.%m.%Y")
+        filename = os.path.join(self._log_directory,f"{today}.txt")
+        with open(filename,"a") as f:
+            f.write(content + '\n')
+
+    def _check_folders(self, res_path, html_path,log_directory):
         print(f'checking {res_path}')
         if not os.path.exists(res_path):
             print(f'folder {res_path} does not exist')
@@ -48,6 +56,12 @@ class Server:
             print(f'folder {html_path} does not exist')
             os.makedirs(html_path)
             print(f'folder {html_path} created')
+        print("OK")
+        print(f'checking {log_directory}')
+        if not os.path.exists(log_directory):
+            print(f'folder {log_directory} does not exist')
+            os.makedirs(log_directory)
+            print(f'folder {log_directory} created')
         print("OK")
         print(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")+"\n")
 
@@ -142,11 +156,13 @@ class Server:
             request = self._read_full_request(conn)
 
             print(request)
+            self._log(f"{request}")
 
             print(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
             print("\n"
                   ".....................................................")
             print("")
+            self._log(f"..............................................")
 
 
             if not request:
@@ -198,6 +214,14 @@ class Server:
                 elif command == "tree":
                     tree_lines = self._print_tree(self._res_directory)
                     response_body = "\n".join(tree_lines)
+                elif command == "version":
+                    response_body = f"Current version is {self._version}"
+                elif command == "versionNum":
+                    response_body = f"{self._version}"
+                elif command == "auth":
+                    response_body = "in dev now"
+                elif command == "reg":
+                    response_body = "in dev now"
                 else:
                     response_body = "Unsupported command."
                     status_code = 400
@@ -211,6 +235,7 @@ class Server:
         self._send_response(conn, response_body, status_code, content_type)
 
     def _handle_get(self, conn, request):
+        '''TODO: сделать маршруты'''
         try:
             request_line = request.split('\r\n')[0]
             method, path, protocol = request_line.split()
@@ -218,8 +243,15 @@ class Server:
 
             if path == "":
                 full_path = os.path.join(self._html_directory, "index.html")
+            elif path == "menu":
+                full_path = os.path.join(self._html_directory, "menu.html")
+            elif path == "main":
+                full_path = os.path.join(self._html_directory, "main.html")
             elif path.endswith('.html'):
                 full_path = os.path.join(self._html_directory, path)
+            elif path=='icon.png':
+                full_path = os.path.join(self._html_directory, path)
+
             else:
                 full_path = os.path.join(self._res_directory, path)
 
@@ -341,21 +373,34 @@ class Server:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind((self._host, self._port))
         server.listen(50)
-        print(f"Server running on http://{self._host}:{self._port} " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
+        line = f'| Server running on http://{self._host}:{self._port} { datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")} |'
+        self._log(line)
+        print("+"* len(line))
+        print(line)
+        print("+" * len(line))
         flag = True
         try:
             while flag:
                 conn, addr = server.accept()
-                print("-------------------------------------------------")
-                print(f"Connected to IP: {addr[0]}\nPORT: {addr[1]}\nDATE: " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")+"\n")
+                line = f"Connected to IP: {addr[0]}\nPORT: {addr[1]}\nDATE: " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")+"\n"
+
+                print("-" * len(line))
+                self._log("-" * len(line))
+                self._log(line)
+                print(line)
                 client_thread = threading.Thread(target=self._handle_client, args=(conn,))
                 client_thread.start()
         except KeyboardInterrupt:
             print("Остановка сервера...")
         finally:
             server.close()
-            print("Сервер остановлен.")
+            print(f"Сервер остановлен.\n{datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')}")
+            self._log(f"Сервер остановлен.\n{datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')}")
 
+    def __del__(self):
+        print("+++++++++++++++++++++++++++++")
+        print("| The server is shutting up |")
+        print("+++++++++++++++++++++++++++++")
 
 if __name__ == "__main__":
     server = Server("config/config.json")

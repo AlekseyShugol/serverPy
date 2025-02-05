@@ -1,8 +1,10 @@
 {
-    "host": "192.168.109.41",
+    "host": "localhost",
     "port_sender": 8000,
     "port_saver": 8001,
     "res_directory": "res",
     "html_directory": "public",
-    "max_size_gigabytes": 2
+    "log_directory": "logs",
+    "max_size_gigabytes": 2,
+    "version": "1.0"
 }
