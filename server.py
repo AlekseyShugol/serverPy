@@ -5,6 +5,9 @@ import threading
 import datetime
 from json import JSONDecodeError
 
+from modules.database import serverDB
+from modules.database.serverDB import ServerDB
+
 
 class Server:
     def __init__(self, config_file_path):
@@ -13,16 +16,23 @@ class Server:
         self.config_file_path = config_file_path
         if not os.path.exists(config_file_path):
             print("Config file not found")
-            os.makedirs("config")
+            try:
+                os.makedirs("config")
+            except Exception as e:
+                print("Failed to create config file")
             data = {
-                "host": None,
-                "port_sender": None,
-                "port_receiver": None,
-                "res_directory": None,
-                "html_directory": None,
-                "max_size_gigabytes": None
+                "host": "localhost",
+                "port_sender": 8000,
+                "port_saver": 8001,
+                "res_directory": "res",
+                "html_directory": "public",
+                "log_directory": "logs",
+                "database_directory": "data",
+                "max_size_gigabytes": 2,
+                "secret": "secret",
+                "version": "1.0"
             }
-            print(f"create config.json as {data}")
+            print(f"create config.json as {(json.dumps(data, indent=4))}")
             quit(-1)
 
         self._config_file_path = config_file_path
@@ -34,9 +44,13 @@ class Server:
         self._max_size_gigabytes = config_file['max_size_gigabytes']
         self._version = config_file['version']
         self._log_directory = os.path.abspath(config_file['log_directory'])
+        self._database_directory = os.path.abspath(config_file['database_directory'])
+        self._database_name = config_file['database_name']
+        self._secret = config_file['secret']
         self.MAX_REQUEST_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
         self.MAX_FILE_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
-        self._check_folders(self._res_directory,self._html_directory,self._log_directory)
+        self._check_folders(self._res_directory,self._html_directory,self._log_directory,self._database_directory)
+        db = ServerDB(self._database_directory,self._database_name)
 
     def _log(self, content):
         today = datetime.date.today().strftime("%d.%m.%Y")
@@ -44,7 +58,7 @@ class Server:
         with open(filename,"a") as f:
             f.write(content + '\n')
 
-    def _check_folders(self, res_path, html_path,log_directory):
+    def _check_folders(self, res_path, html_path,log_directory,database_directory):
         print(f'checking {res_path}')
         if not os.path.exists(res_path):
             print(f'folder {res_path} does not exist')
@@ -62,6 +76,12 @@ class Server:
             print(f'folder {log_directory} does not exist')
             os.makedirs(log_directory)
             print(f'folder {log_directory} created')
+        print("OK")
+        print(f'checking {database_directory}')
+        if not os.path.exists(database_directory):
+            print(f'folder {database_directory} does not exist')
+            os.makedirs(database_directory)
+            print(f'folder {database_directory} created')
         print("OK")
         print(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")+"\n")
 
@@ -235,7 +255,6 @@ class Server:
         self._send_response(conn, response_body, status_code, content_type)
 
     def _handle_get(self, conn, request):
-        '''TODO: сделать маршруты'''
         try:
             request_line = request.split('\r\n')[0]
             method, path, protocol = request_line.split()

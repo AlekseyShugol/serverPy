@@ -1,3 +1,7 @@
 /res/
 /buf/
 /logs/
+/backup/
+/.venv/
+/config/data/
+/modules/database/dbTest.db

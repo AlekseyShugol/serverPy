@@ -5,6 +5,9 @@
     "res_directory": "res",
     "html_directory": "public",
     "log_directory": "logs",
+    "database_directory": "config/data",
+    "database_name": "serverData",
     "max_size_gigabytes": 2,
+    "secret": "secret",
     "version": "1.0"
 }

@@ -54,8 +54,8 @@ class Saver:
         print("OK")
 
         print(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S") + "\n")
-        if not os.path.exists("buf"):
-            os.makedirs("buf")
+        if not os.path.exists("modules/main/saver/buf"):
+            os.makedirs("modules/main/saver/buf")
 
     def start_console(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -80,7 +80,7 @@ class Saver:
                     break
 
                 # Сохраняем файл сначала в папку buf
-                buf_path = os.path.join("buf", filename)
+                buf_path = os.path.join("modules/main/saver/buf", filename)
                 with open(buf_path, 'wb') as f:
                     print(f"Получение файла: {filename}")
                     while True:

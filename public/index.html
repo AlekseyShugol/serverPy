@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Авторизация и регистрация</title>
+    <title>Authorization/Registration</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,19 +57,19 @@
 <body>
 
 <div class="container" id="authContainer">
-    <h2 id="formTitle">Авторизация</h2>
+    <h2 id="formTitle">Authorization</h2>
     <form id="authForm">
         <div class="form-group">
-            <label for="username">Имя пользователя</label>
+            <label for="username">You name</label>
             <input type="text" id="username" required>
         </div>
         <div class="form-group">
-            <label for="password">Пароль</label>
+            <label for="password">Password</label>
             <input type="password" id="password" required>
         </div>
-        <button type="submit" class="toggle-btn">Войти</button>
+        <button type="submit" class="toggle-btn">Enter</button>
     </form>
-    <button class="toggle-btn" id="toggleForm">Нет аккаунта? Зарегистрироваться</button>
+    <button class="toggle-btn" id="toggleForm">Sign Up</button>
     <a href="main">main</a>
 </div>
 
@@ -80,15 +80,15 @@
     const body = document.body;
 
     toggleFormButton.addEventListener('click', () => {
-        if (formTitle.innerText === 'Авторизация') {
-            formTitle.innerText = 'Регистрация';
-            authForm.querySelector('button').innerText = 'Зарегистрироваться';
-            toggleFormButton.innerText = 'Уже есть аккаунт? Войти';
+        if (formTitle.innerText === 'Authorization') {
+            formTitle.innerText = 'Registration';
+            authForm.querySelector('button').innerText = 'Sign in';
+            toggleFormButton.innerText = 'Sign In';
             body.style.backgroundColor = '#e0f7fa'; // Светлый фон для регистрации
         } else {
-            formTitle.innerText = 'Авторизация';
-            authForm.querySelector('button').innerText = 'Войти';
-            toggleFormButton.innerText = 'Нет аккаунта? Зарегистрироваться';
+            formTitle.innerText = 'Authorization';
+            authForm.querySelector('button').innerText = 'Enter';
+            toggleFormButton.innerText = 'Sign up';
             body.style.backgroundColor = '#b3e5fc'; // Темный фон для авторизации
         }
     });
