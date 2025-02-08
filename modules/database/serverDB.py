@@ -4,7 +4,7 @@ from modules.token.jwtManager import JWTManager
 
 class ServerDB:
     def __init__(self, path, name):
-        self._conn = sqlite3.connect(f"{path}/{name}.db")
+        self._conn = sqlite3.connect(f"{path}/{name}.db", check_same_thread=False)
         self._cursor = self._conn.cursor()
         self._cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
@@ -29,6 +29,7 @@ class ServerDB:
         self._cursor.execute("INSERT INTO users (login, password, role) VALUES (?, ?, ?)",
                              (login, hashed_password, role))
         self._conn.commit()
+
 
     def get_user(self, login):
         self._cursor.execute("SELECT id, login, password, role FROM users WHERE login = ?", (login,))

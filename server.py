@@ -4,6 +4,8 @@ import os
 import threading
 import datetime
 from json import JSONDecodeError
+from urllib.parse import unquote
+
 
 from modules.database import serverDB
 from modules.database.serverDB import ServerDB
@@ -50,7 +52,7 @@ class Server:
         self.MAX_REQUEST_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
         self.MAX_FILE_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
         self._check_folders(self._res_directory,self._html_directory,self._log_directory,self._database_directory)
-        db = ServerDB(self._database_directory,self._database_name)
+        self._db = ServerDB(self._database_directory,self._database_name)
 
     def _log(self, content):
         today = datetime.date.today().strftime("%d.%m.%Y")
@@ -144,11 +146,19 @@ class Server:
                 break
             data += chunk
 
-            if len(data) > self.MAX_REQUEST_SIZE:
+            # Декодируем только после завершения чтения
+            try:
+                decoded_data = data.decode('utf-8')
+            except UnicodeDecodeError:
+                print("Ошибка декодирования. Проверьте кодировку.")
+                # Можно обработать ошибку или вернуть None
+                return None
+
+            if len(decoded_data) > self.MAX_REQUEST_SIZE:
                 raise ValueError("Request size exceeds limit")
-            if b'\r\n\r\n' in data:
-                headers_part, body_part = data.split(b'\r\n\r\n', 1)
-                headers = headers_part.decode().split('\r\n')
+            if '\r\n\r\n' in decoded_data:
+                headers_part, body_part = decoded_data.split('\r\n\r\n', 1)
+                headers = headers_part.split('\r\n')
                 content_length = 0
 
                 for header in headers:
@@ -163,11 +173,10 @@ class Server:
                     chunk = conn.recv(4096)
                     if not chunk:
                         break
-                    body_part += chunk
-                    if len(body_part) > self.MAX_REQUEST_SIZE:
-                        raise ValueError("Request body too large")
+                    body_part += chunk.decode('utf-8', errors='ignore')  # Декодируем только тело
 
-                return headers_part.decode() + '\r\n\r\n' + body_part.decode()
+                return headers_part + '\r\n\r\n' + body_part
+
         return None
 
     def _handle_client(self, conn):
@@ -207,49 +216,134 @@ class Server:
         response_body = "Unknown command."
 
         try:
-            headers, body = request.split('\r\n\r\n', 1)
-            content_length = int(
-                [h for h in headers.split('\r\n') if h.startswith("Content-Length:")][0].split(': ')[1])
+            post_data = {}
+            command = ""
+            # Разделяем заголовки и тело запроса
+            if '\r\n\r\n' not in request:
+                raise ValueError("Invalid request format: missing headers-body separator.")
 
+            headers, body = request.split('\r\n\r\n', 1)
+
+            # Извлекаем Content-Length (если есть)
+            content_length = 0
+            for header_line in headers.split('\r\n'):
+                if header_line.startswith("Content-Length:"):
+                    content_length = int(header_line.split(': ')[1])
+                    break
+
+            # Проверяем, что тело запроса не пустое
+            if not body and content_length > 0:
+                raise ValueError("Empty body in request.")
+
+            # Извлекаем Content-Type (если есть)
+            content_type = 'text/plain'  # Значение по умолчанию
+            for header_line in headers.split('\r\n'):
+                if header_line.startswith("Content-Type:"):
+                    content_type = header_line.split(': ')[1]
+                    break
+
+            # Обрабатываем multipart/form-data
+            if 'multipart/form-data' in content_type:
+                boundary = content_type.split('boundary=')[1]
+                parts = body.split('--' + boundary)
+
+                for part in parts:
+                    if 'filename="' in part:
+                        file_name = part.split('filename="')[1].split('"')[0]
+                        file_content = part.split('\r\n\r\n')[1].rstrip('\r\n--')
+                        file_path = os.path.join(self._res_directory, file_name)
+
+                        with open(file_path, 'wb') as f:
+                            f.write(file_content.encode())
+
+                        response_body = f"File '{file_name}' uploaded successfully."
+                        break
+            # Обрабатываем application/json
+            elif 'application/json' in content_type:
+                if not body:
+                    raise ValueError("Empty JSON body.")
+
+                try:
+                    post_data = json.loads(body)  # Декодируем JSON из тела запроса
+                    command = post_data.get("command")  # Извлекаем команду
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Invalid JSON: {str(e)}")
+
+            # Обрабатываем обычные form-data
+            else:
+                for pair in body.split('&'):
+                    if '=' in pair:
+                        key, value = pair.split('=', 1)
+                        post_data[key] = unquote(value)
+                try:
+
+                    command = post_data.get("command")  # Извлекаем команду
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Invalid JSON: {str(e)}")
+
+
+
+            # Дополнительная логика для обработки команд
             if "upload" in headers:
                 file_name = headers.split('filename="')[1].split('"')[0]
                 file_path = os.path.join(self._res_directory, file_name)
 
-                # Save the uploaded file
                 with open(file_path, 'wb') as f:
-                    f.write(body.encode()[:content_length])  # Write only the content length bytes
+                    f.write(body.encode()[:content_length])
 
-                response_body = f"File '{file_name}' uploaded successfully."
-                content_type = 'text/plain'
-            else:
-                command_data = json.loads(body)
-                command = command_data.get("command")
-
-                if command == "status":
-                    response_body = "Server is running."
-                elif command == "list":
-                    structure = self._create_directory_structure(self._res_directory)
-                    response_body = json.dumps(structure, indent=2)
-                    content_type = 'application/json'
-                elif command == "tree":
-                    tree_lines = self._print_tree(self._res_directory)
-                    response_body = "\n".join(tree_lines)
-                elif command == "version":
-                    response_body = f"Current version is {self._version}"
-                elif command == "versionNum":
-                    response_body = f"{self._version}"
-                elif command == "auth":
-                    response_body = "in dev now"
-                elif command == "reg":
-                    response_body = "in dev now"
+            content_type = 'text/plain'
+            if command == "status":
+                response_body = "Server is running."
+            elif command == "list":
+                structure = self._create_directory_structure(self._res_directory)
+                response_body = json.dumps(structure, indent=2)
+                content_type = 'application/json'
+            elif command == "tree":
+                tree_lines = self._print_tree(self._res_directory)
+                response_body = "\n".join(tree_lines)
+            elif command == "version":
+                response_body = f"Current version is {self._version}"
+            elif command == "versionNum":
+                response_body = f"{self._version}"
+            elif command == "auth":
+                response_body = {"status": "in dev"}
+                response_body = json.dumps(response_body)
+            elif command == "reg":
+                login = post_data.get("login")
+                password = post_data.get("password")
+                if not login:
+                    response_body = "Login is required."
+                elif not password:
+                    response_body = "Password is required."
                 else:
-                    response_body = "Unsupported command."
-                    status_code = 400
+                    content_type = "application/json"
+                    self._db.insert_user(login, password)
+                    message1 = f"User {login} registered successfully."
+                    message2 = f"Add {login} to db successfully."
+                    time = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                    print(message1)
+                    print(message2)
+                    print(time)
+                    self._log(f"{message1}\n{message2}\n{time}")
+                    if self._db.check_user(login, password):
+                        response_body = {"status":"success"}
+                    response_body = json.dumps(response_body)
+
+            else:
+                response_body = {"status": "unsupported"}
+                response_body = json.dumps(response_body)
+                status_code = 400
         except JSONDecodeError as e:
-            response_body = f" {str(e)}"
+            response_body = {"status": "error", "message": str(e)}
+            response_body = json.dumps(response_body)
+            status_code = 400
+        except ValueError as e:
+            response_body = {"status": "error", "message": str(e)}
+            response_body = json.dumps(response_body)
             status_code = 400
         except Exception as e:
-            response_body = f"Error processing request: {str(e)}"
+            response_body = {"status": "error", "message": str(e)}
+            response_body = json.dumps(response_body)
             status_code = 500
 
         self._send_response(conn, response_body, status_code, content_type)
@@ -259,6 +353,7 @@ class Server:
             request_line = request.split('\r\n')[0]
             method, path, protocol = request_line.split()
             path = path.lstrip('/')
+            path = unquote(path)
 
             if path == "":
                 full_path = os.path.join(self._html_directory, "index.html")
@@ -266,11 +361,12 @@ class Server:
                 full_path = os.path.join(self._html_directory, "menu.html")
             elif path == "main":
                 full_path = os.path.join(self._html_directory, "main.html")
+            elif path == "reg":
+                full_path = os.path.join(self._html_directory, "index.html")
             elif path.endswith('.html'):
                 full_path = os.path.join(self._html_directory, path)
             elif path=='icon.png':
                 full_path = os.path.join(self._html_directory, path)
-
             else:
                 full_path = os.path.join(self._res_directory, path)
 
@@ -327,6 +423,7 @@ class Server:
             self._send_response(conn, "Internal Server Error", 500)
 
     def _serve_html_file(self, conn, file_path):
+
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()

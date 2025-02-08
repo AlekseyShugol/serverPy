@@ -1,98 +1,103 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authorization/Registration</title>
+    <title>Registration Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-            transition: background-color 3s ease;
+            background: linear-gradient(45deg, #ff6b6b, #f7b733);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
         }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            transition: all 0.3s ease;
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        h2 {
-            text-align: center;
+
+        h1 {
+            color: white;
+            margin-bottom: 20px;
         }
-        .form-group {
+
+        label {
+            color: white;
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 200px;
             margin-bottom: 15px;
         }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .toggle-btn {
-            background: #007BFF;
-            color: white;
+
+        button {
+            padding: 10px 15px;
             border: none;
-            padding: 10px;
-            border-radius: 4px;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
             cursor: pointer;
-            width: 100%;
-            transition: background 0.3s, margin 0.3s;
-            margin-top: 10px; /* Расстояние между кнопками */
+            transition: background-color 0.3s;
         }
-        .toggle-btn:hover {
-            background: #0056b3;
+
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
+    <div>
+        <h1>Registration Form</h1>
+        <label for="login">Login:</label>
+        <input type="text" id="login">
+        <label for="password">Password:</label>
+        <input type="password" id="password">
+        <button id="registerButton">Register</button>
+    </div>
 
-<div class="container" id="authContainer">
-    <h2 id="formTitle">Authorization</h2>
-    <form id="authForm">
-        <div class="form-group">
-            <label for="username">You name</label>
-            <input type="text" id="username" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" required>
-        </div>
-        <button type="submit" class="toggle-btn">Enter</button>
-    </form>
-    <button class="toggle-btn" id="toggleForm">Sign Up</button>
-    <a href="main">main</a>
-</div>
+    <script>
+        document.getElementById('registerButton').onclick = function() {
+            const jsonData = {
+                "login": document.getElementById('login').value,
+                "password": document.getElementById('password').value,
+                "command": "reg"
+            };
 
-<script>
-    const toggleFormButton = document.getElementById('toggleForm');
-    const authForm = document.getElementById('authForm');
-    const formTitle = document.getElementById('formTitle');
-    const body = document.body;
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status == "success"){
+                    alert("Successfully")
+                }else if (data.message === "UNIQUE constraint failed: users.login"){
+                    alert("choose the other login")
+                }
+                console.log('Response from server:', data);
+                console.log(data.status === "success")
 
-    toggleFormButton.addEventListener('click', () => {
-        if (formTitle.innerText === 'Authorization') {
-            formTitle.innerText = 'Registration';
-            authForm.querySelector('button').innerText = 'Sign in';
-            toggleFormButton.innerText = 'Sign In';
-            body.style.backgroundColor = '#e0f7fa'; // Светлый фон для регистрации
-        } else {
-            formTitle.innerText = 'Authorization';
-            authForm.querySelector('button').innerText = 'Enter';
-            toggleFormButton.innerText = 'Sign up';
-            body.style.backgroundColor = '#b3e5fc'; // Темный фон для авторизации
-        }
-    });
-</script>
-
+            })
+            .catch(error => {
+                console.log('Error:', error);
+            });
+        };
+    </script>
 </body>
 </html>

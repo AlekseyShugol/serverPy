@@ -12,7 +12,7 @@ REM Активация виртуального окружения
 call serverEnv\Scripts\activate
 
 REM Обновление pip
-python -m pip install --upgrade pip
+py -m pip install --upgrade pip
 
 REM Переход в папку config\init
 cd start\init

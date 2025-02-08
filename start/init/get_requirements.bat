@@ -3,7 +3,7 @@ REM Переход на две директории вверх
 cd ..\..
 
 REM Создание виртуального окружения
-python -m venv myenv
+py -m venv myenv
 
 REM Активация виртуального окружения
 call serverEnv\Scripts\activate
