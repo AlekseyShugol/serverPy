@@ -7,7 +7,7 @@ import shutil
 
 class Saver:
     def __init__(self, config_file_path):
-        print("initialization server")
+        print("initialization main")
         print("reading config file")
         self._config_file_path = config_file_path
         if not os.path.exists(config_file_path):

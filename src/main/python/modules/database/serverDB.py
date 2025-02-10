@@ -1,6 +1,6 @@
 import sqlite3
 import bcrypt
-from modules.token.jwtManager import JWTManager
+
 
 class ServerDB:
     def __init__(self, path, name):

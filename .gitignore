@@ -1,7 +1,6 @@
-/res/
-/buf/
+/OLD/
+/config/data/serverData.db
 /logs/
-/backup/
+/resources/basket/
 /.venv/
-/config/data/
-/modules/database/dbTest.db
+/.idea/

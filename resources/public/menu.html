@@ -132,6 +132,7 @@
     <script>
         let isTreeVisible = false;
         let isExplorerVisible = false;
+        const token = localStorage.getItem("token")
 
         // Toggle tree visibility
         async function toggleTree() {
@@ -147,13 +148,13 @@
             }
         }
 
-        // Send tree request to the server
+        // Send tree request to the main
         async function sendTreeRequest() {
             try {
                 const response = await fetch('', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: 'tree' })
+                    body: JSON.stringify({ command: 'tree', token: `${token}` })
                 });
                 const data = await response.text();
                 document.getElementById('treeResponse').textContent = data;
@@ -182,16 +183,22 @@
             }
         }
 
-        // List files from the server
+        // List files from the main
         async function listDirectory() {
             try {
                 const response = await fetch('', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: 'list' })
+                    body: JSON.stringify({ command: 'list',token: `${token}` })
                 });
                 const data = await response.json();
-                renderExplorer(data);
+                 console.log(data)
+                if(data.message === "Invalid token"){
+                    window.location.href = "401.html"
+                }else{
+                    renderExplorer(data);
+                }
+
             } catch (error) {
                 console.error('Error:', error);
             }

@@ -6,9 +6,8 @@ import datetime
 from json import JSONDecodeError
 from urllib.parse import unquote
 
-
-from modules.database import serverDB
-from modules.database.serverDB import ServerDB
+from ..modules.database.serverDB import ServerDB
+from ..modules.token.jwtManager import JWTManager
 
 
 class Server:
@@ -295,9 +294,16 @@ class Server:
             if command == "status":
                 response_body = "Server is running."
             elif command == "list":
-                structure = self._create_directory_structure(self._res_directory)
-                response_body = json.dumps(structure, indent=2)
-                content_type = 'application/json'
+                token = JWTManager("secret") #TODO переписать ключ в конфиг
+                user_token = post_data.get("token")
+                if token.validate_token(user_token):
+                    structure = self._create_directory_structure(self._res_directory)
+                    response_body = json.dumps(structure, indent=2)
+                    content_type = 'application/json'
+                else:
+                    response_body = {"status": "error", "message": "Invalid token"}
+                    response_body = json.dumps(response_body, indent=2)
+                    self._send_response(conn, response_body)
             elif command == "tree":
                 tree_lines = self._print_tree(self._res_directory)
                 response_body = "\n".join(tree_lines)
@@ -306,15 +312,40 @@ class Server:
             elif command == "versionNum":
                 response_body = f"{self._version}"
             elif command == "auth":
-                response_body = {"status": "in dev"}
-                response_body = json.dumps(response_body)
+                login = post_data.get("login")
+                password = post_data.get("password")
+                response_body = {}
+                if not login:
+                    response_body = {"status": "Login is required."}
+                    response_body = json.dumps(response_body)
+                elif not password:
+                    response_body = {"status": "Password is required."}
+                    response_body = json.dumps(response_body)
+
+
+                check_result = self._db.check_user(login, password)
+                if check_result:
+                    token = JWTManager('secret') #TODO: вынести в отдельный файл
+                    user_id = self._db.get_user_id_by_login(login)
+                    encode_token = token.encode(user_id)
+
+                    response_body = {
+                        "status": "success",
+                        f"token": f"{encode_token}"
+                    }
+                    response_body = json.dumps(response_body)
+                else:
+                    response_body = {
+                        "status": "auth error"
+                    }
+                    response_body = json.dumps(response_body)
             elif command == "reg":
                 login = post_data.get("login")
                 password = post_data.get("password")
                 if not login:
-                    response_body = "Login is required."
+                    response_body = {"status": "Login is required."}
                 elif not password:
-                    response_body = "Password is required."
+                    response_body = {"status": "Password is required."}
                 else:
                     content_type = "application/json"
                     self._db.insert_user(login, password)
@@ -328,7 +359,6 @@ class Server:
                     if self._db.check_user(login, password):
                         response_body = {"status":"success"}
                     response_body = json.dumps(response_body)
-
             else:
                 response_body = {"status": "unsupported"}
                 response_body = json.dumps(response_body)
@@ -362,6 +392,8 @@ class Server:
             elif path == "main":
                 full_path = os.path.join(self._html_directory, "main.html")
             elif path == "reg":
+                full_path = os.path.join(self._html_directory, "registration.html")
+            elif path == "auth":
                 full_path = os.path.join(self._html_directory, "index.html")
             elif path.endswith('.html'):
                 full_path = os.path.join(self._html_directory, path)
@@ -515,9 +547,10 @@ class Server:
 
     def __del__(self):
         print("+++++++++++++++++++++++++++++")
-        print("| The server is shutting up |")
+        print("| The main is shutting up |")
         print("+++++++++++++++++++++++++++++")
 
 if __name__ == "__main__":
     server = Server("config/config.json")
     server.start()
+    
