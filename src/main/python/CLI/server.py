@@ -47,7 +47,8 @@ class Server:
         self._log_directory = os.path.abspath(config_file['log_directory'])
         self._database_directory = os.path.abspath(config_file['database_directory'])
         self._database_name = config_file['database_name']
-        self._secret = config_file['secret']
+        self._secrets_file = self._read_secret(config_file["secret_path"])
+        self._secret = self._secrets_file['secret']
         self.MAX_REQUEST_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
         self.MAX_FILE_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
         self._check_folders(self._res_directory,self._html_directory,self._log_directory,self._database_directory)
@@ -88,6 +89,10 @@ class Server:
 
     def _read_config(self):
         with open(self._config_file_path, 'r') as config_file:
+            return json.load(config_file)
+
+    def _read_secret(self, file_path):
+        with open(file_path, 'r') as config_file:
             return json.load(config_file)
 
     def _print_tree(self, path, prefix=""):
@@ -294,7 +299,7 @@ class Server:
             if command == "status":
                 response_body = "Server is running."
             elif command == "list":
-                token = JWTManager("secret") #TODO переписать ключ в конфиг
+                token = JWTManager(self._secret)
                 user_token = post_data.get("token")
                 if token.validate_token(user_token):
                     structure = self._create_directory_structure(self._res_directory)
@@ -325,7 +330,7 @@ class Server:
 
                 check_result = self._db.check_user(login, password)
                 if check_result:
-                    token = JWTManager('secret') #TODO: вынести в отдельный файл
+                    token = JWTManager(self._secret)
                     user_id = self._db.get_user_id_by_login(login)
                     encode_token = token.encode(user_id)
 
@@ -547,7 +552,7 @@ class Server:
 
     def __del__(self):
         print("+++++++++++++++++++++++++++++")
-        print("| The main is shutting up |")
+        print("| The server is shutting up |")
         print("+++++++++++++++++++++++++++++")
 
 if __name__ == "__main__":

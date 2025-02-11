@@ -2,7 +2,7 @@ import json
 import jwt
 import datetime
 
-class JWTManager():
+class JWTManager:
     def __init__(self, secret_key, algorithm='HS256'):
         self.secret_key = secret_key
         self.algorithm = algorithm

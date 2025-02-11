@@ -4,3 +4,5 @@
 /resources/basket/
 /.venv/
 /.idea/
+/config/data/secrets.json
+/config/data/userData.db
