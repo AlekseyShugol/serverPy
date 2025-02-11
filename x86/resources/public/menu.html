@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Interaction</title>
+    <link rel="icon" href="icon.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            background-color: white;
+            width: 600px;
+            max-width: 100%;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            width: 100%;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #007bff, #00c6ff);
+            transform: scale(1.05);
+        }
+        input {
+            width: calc(100% - 20px);
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+        }
+        pre {
+            width: 100%;
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .explorer {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .folder {
+            margin-left: 15px;
+            cursor: pointer;
+        }
+        .folder > .children {
+            display: none;
+            margin-left: 20px;
+        }
+        .folder.expanded > .children {
+            display: block;
+        }
+        .item {
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .item:hover {
+            background-color: #f0f0f0;
+        }
+        .folder-icon::before {
+            content: '📁 ';
+        }
+        .file-icon::before {
+            content: '📄 ';
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Choose you file to download here</h1>
+
+<!--        <div>-->
+<!--            <button id="treeButton" onclick="toggleTree()">Get Directory Tree</button>-->
+<!--            <pre id="treeResponse"></pre>-->
+<!--        </div>-->
+
+        <div>
+            <button id="explorerButton" onclick="toggleExplorer()">List Files</button>
+            <div class="explorer" id="fileExplorer"></div>
+        </div>
+
+        <input type="text" id="filePath" placeholder="Enter file path...">
+        <button onclick="downloadFile()">Download File</button>
+    </div>
+</body>
+
+    <script>
+        let isTreeVisible = false;
+        let isExplorerVisible = false;
+        const token = localStorage.getItem("token")
+
+        // Toggle tree visibility
+        async function toggleTree() {
+            const treeButton = document.getElementById('treeButton');
+            if (isTreeVisible) {
+                closeTree();
+                treeButton.textContent = 'Get Directory Tree';
+                isTreeVisible = false;
+            } else {
+                await sendTreeRequest();
+                treeButton.textContent = 'Close Tree';
+                isTreeVisible = true;
+            }
+        }
+
+        // Send tree request to the main
+        async function sendTreeRequest() {
+            try {
+                const response = await fetch('', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: 'tree', token: `${token}` })
+                });
+                const data = await response.text();
+                document.getElementById('treeResponse').textContent = data;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Close the tree view
+        function closeTree() {
+            document.getElementById('treeResponse').textContent = '';
+        }
+
+        // Toggle file explorer visibility
+        async function toggleExplorer() {
+            const explorerButton = document.getElementById('explorerButton');
+            const explorerContainer = document.getElementById('fileExplorer');
+            if (isExplorerVisible) {
+                explorerContainer.innerHTML = ''; // Clear the contents
+                explorerButton.textContent = 'List Files';
+                isExplorerVisible = false;
+            } else {
+                await listDirectory();  // Load files and show them
+                explorerButton.textContent = 'Close Files';
+                isExplorerVisible = true;
+            }
+        }
+
+        // List files from the main
+        async function listDirectory() {
+            try {
+                const response = await fetch('', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: 'list',token: `${token}` })
+                });
+                const data = await response.json();
+                 console.log(data)
+                if(data.message === "Invalid token"){
+                    window.location.href = "401.html"
+                }else{
+                    renderExplorer(data);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Render the file explorer
+        function renderExplorer(data, parentElement = null, parentPath = '') {
+            const container = parentElement || document.getElementById('fileExplorer');
+            container.innerHTML = ''; // Clear container before rendering
+
+            Object.entries(data).forEach(([name, info]) => {
+                const fullPath = parentPath ? `${parentPath}/${name}` : name;
+                const item = document.createElement('div');
+                item.className = `item ${info.type === 'directory' ? 'folder' : 'file'}`;
+                item.textContent = name;
+
+                if (info.type === 'directory') {
+                    item.classList.add('folder-icon');
+                    item.onclick = function (e) {
+                        e.stopPropagation();
+                        if (!item.classList.contains('expanded')) {
+                            if (!item.querySelector('.children')) {
+                                const childrenContainer = document.createElement('div');
+                                childrenContainer.className = 'children';
+                                item.appendChild(childrenContainer);
+                                renderExplorer(info.children, childrenContainer, fullPath);
+                            }
+                            item.classList.add('expanded');
+                        } else {
+                            item.classList.remove('expanded');
+                        }
+                    };
+                } else {
+                    item.classList.add('file-icon');
+                    item.onclick = function () {
+                        document.getElementById('filePath').value = fullPath;
+                    };
+                }
+
+                container.appendChild(item);
+            });
+        }
+
+        // Download the selected file
+        function downloadFile() {
+            const filePath = document.getElementById('filePath').value;
+            if (filePath) {
+                window.location.href = filePath;
+            } else {
+                alert('Please enter a file path.');
+            }
+        }
+    </script>
+</html>
+

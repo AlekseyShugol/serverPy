@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link rel="shortcut icon" href="icon.png">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(45deg, #6a82fb, #fc5c7d);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 25%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 300px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            color: #555;
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #6a82fb;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #6a82fb;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #5a6bd3;
+            transform: translateY(-2px);
+        }
+
+        a {
+            display: block;
+            margin-top: 15px;
+            color: #6a82fb;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registration Form</h1>
+        <label for="login">Login:</label>
+        <input type="text" id="login" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+        <button id="registerButton">Register</button>
+        <a href="auth">Go back</a>
+    </div>
+
+    <script>
+        document.getElementById('registerButton').onclick = function() {
+            const jsonData = {
+                "login": document.getElementById('login').value,
+                "password": document.getElementById('password').value,
+                "command": "reg"
+            };
+
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success"){
+                    alert("Successfully registered!");
+                    window.location.href = "auth";
+                } else if (data.message === "UNIQUE constraint failed: users.login"){
+                    alert("Choose a different login.");
+                } else if (data.status === "auth error"){
+                    alert("Incorrect login or password.");
+                }
+                console.log('Response from server:', data);
+            })
+            .catch(error => {
+                console.log('Error:', error);
+            });
+        };
+    </script>
+</body>
+</html>

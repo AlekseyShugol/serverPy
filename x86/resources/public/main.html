@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server connected successfully.</title>
+    <link rel="shortcut icon" href="icon.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            background-size: 400% 400%;
+            animation: gradientAnimation 30s ease infinite;
+            color: #333;
+            margin: 0;
+            height: 100vh; /* Ensure body takes full height */
+            overflow: hidden;
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .greeting {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5dc; /* Light beige */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 48px;
+            color: #333;
+            opacity: 1;
+            transition: opacity 2s ease;
+            z-index: 10;
+        }
+        .container {
+            display: none; /* Hide container initially */
+            opacity: 0; /* Start hidden */
+            transition: opacity 2s ease; /* Fade-in effect */
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            background-color: white;
+            position: absolute; /* Change to absolute */
+            top: 50%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Adjust for centering */
+            z-index: 1;
+        }
+        p {
+            background-color: #4caf50;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+        p:hover {
+            transform: scale(1.01);
+            background: linear-gradient(135deg, #4caf50, #e1d2d2);
+        }
+        a {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s, transform 0.2s;
+            text-align: center;
+        }
+        a:hover {
+            background: linear-gradient(135deg, #007bff, #00c6ff);
+            transform: scale(1.05);
+        }
+        .time {
+            font-size: 24px;
+            color: #fff;
+            background-color: #333;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+        }
+        .time:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #333, #555);
+        }
+    </style>
+</head>
+<body>
+    <div class="greeting">Welcome!</div>
+    <div class="container">
+        <p>Server connected successfully.</p>
+        <div class="time" id="time"></div>
+        <a href="menu">Main menu</a>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('time').textContent = timeString;
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime(); // Initial call to display time immediately
+
+        // Hide greeting and show main content
+        setTimeout(() => {
+            document.querySelector('.greeting').style.opacity = '0';
+            setTimeout(() => {
+                document.querySelector('.greeting').style.display = 'none';
+                const container = document.querySelector('.container');
+                container.style.display = 'flex';
+                setTimeout(() => {
+                    container.style.opacity = '1'; // Fade in the container
+                }, 10); // Small timeout to ensure transition applies
+            }, 700); // Wait for fade-out to complete
+        }, 800); // Show greeting for 3 seconds
+    </script>
+</body>
+</html>
