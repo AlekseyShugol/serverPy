@@ -1,0 +1,285 @@
+| Server running on http://localhost:8000 10.02.2025 20:46:07 |
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49214
+DATE: 10.02.2025 20:46:12
+
+GET / HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49215
+DATE: 10.02.2025 20:46:13
+
+None
+..............................................
+| Server running on http://localhost:8000 10.02.2025 21:06:21 |
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49399
+DATE: 10.02.2025 21:06:26
+
+GET / HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49400
+DATE: 10.02.2025 21:06:26
+
+GET /icon.png HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: image/avif,image/webp,image/png,image/svg+xml,image/*;q=0.8,*/*;q=0.5
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Referer: http://localhost:8000/
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Sec-Fetch-Dest: image
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Site: same-origin
+Priority: u=6
+
+
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49401
+DATE: 10.02.2025 21:06:27
+
+POST / HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: */*
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Referer: http://localhost:8000/
+Content-Type: application/json
+Content-Length: 50
+Origin: http://localhost:8000
+Connection: keep-alive
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+Priority: u=0
+
+{"login":"alex","password":"123","command":"auth"}
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49402
+DATE: 10.02.2025 21:06:27
+
+GET /main HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Referer: http://localhost:8000/
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49403
+DATE: 10.02.2025 21:06:30
+
+GET /menu HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Referer: http://localhost:8000/main
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49404
+DATE: 10.02.2025 21:06:41
+
+GET /menu HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Referer: http://localhost:8000/main
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49405
+DATE: 10.02.2025 21:06:59
+
+GET /menu HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Referer: http://localhost:8000/main
+Connection: keep-alive
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49406
+DATE: 10.02.2025 21:07:01
+
+POST /menu HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: */*
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Referer: http://localhost:8000/menu
+Content-Type: application/json
+Content-Length: 150
+Origin: http://localhost:8000
+Connection: keep-alive
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+Priority: u=0
+
+{"command":"list","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE3MzkyMjMzODd9.vBPkYGX3EhZLbtRfSBz0dkiMKI24titDXzKIN61t2oM"}
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49407
+DATE: 10.02.2025 21:07:02
+
+POST /menu HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: */*
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Referer: http://localhost:8000/menu
+Content-Type: application/json
+Content-Length: 150
+Origin: http://localhost:8000
+Connection: keep-alive
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+Priority: u=0
+
+{"command":"list","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE3MzkyMjMzODd9.vBPkYGX3EhZLbtRfSBz0dkiMKI24titDXzKIN61t2oM"}
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49671
+DATE: 10.02.2025 21:08:48
+
+GET /menu HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Referer: http://localhost:8000/main
+Connection: keep-alive
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+
+..............................................
+-----------------------------------------------------------------
+Connected to IP: 127.0.0.1
+PORT: 49672
+DATE: 10.02.2025 21:08:52
+
+POST /menu HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: */*
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate, br, zstd
+Referer: http://localhost:8000/menu
+Content-Type: application/json
+Content-Length: 150
+Origin: http://localhost:8000
+Connection: keep-alive
+Cookie: Idea-13e65c42=30fb2f5e-d863-4ba5-8ea8-f1e2a9f8ffff
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+Priority: u=0
+
+{"command":"list","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE3MzkyMjMzODd9.vBPkYGX3EhZLbtRfSBz0dkiMKI24titDXzKIN61t2oM"}
+..............................................
