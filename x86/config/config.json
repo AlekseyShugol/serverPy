@@ -1,5 +1,5 @@
 {
-    "host": "192.168.0.141",
+    "host": "localhost",
     "port_sender": 8000,
     "port_saver": 8001,
     "res_directory": "resources/basket",
