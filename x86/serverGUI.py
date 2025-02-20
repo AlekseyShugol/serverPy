@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import socket
 import tkinter as tk
 from json import JSONDecodeError
@@ -177,7 +178,7 @@ class ServerGui:
                 }
         return structure
 
-    def _read_full_request(self, conn):
+    def _read_full_request(self, conn, body = True):
         data = b''
         while True:
             chunk = conn.recv(4096)
@@ -214,17 +215,24 @@ class ServerGui:
                         break
                     body_part += chunk.decode('utf-8', errors='ignore')  # Декодируем только тело
                     print(headers_part + '\r\n\r\n' + body_part)
+                if body:
+                    return headers_part + '\r\n\r\n' + body_part
+                else:
+                    return headers_part + '\r\n\r\n'
 
-                return headers_part + '\r\n\r\n'
+    def _remove_auth_line(self,text):
+        masked_data = re.sub(r'("password":\s*")[^"]*(")', r'\1****\2', text)
+        return masked_data
 
     def _handle_client(self, conn):
         try:
             conn.settimeout(45)
             request = self._read_full_request(conn)
+            request_head = self._remove_auth_line(request)
 
-            print(request)
-            self.display_text(request)
-            self._log(f"{request}")
+            print(request_head)
+            self.display_text(request_head)
+            self._log(f"{request_head}")
 
             print(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
             self.display_text(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
