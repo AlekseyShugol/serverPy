@@ -11,7 +11,7 @@ from urllib.parse import unquote
 from serverDB import ServerDB
 from jwtManager import JWTManager
 
-class MyApp:
+class ServerGui:
     def __init__(self, config_file_path):
         self._root = tk.Tk()
         self._root.geometry("800x600")
@@ -57,7 +57,7 @@ class MyApp:
         self.MAX_FILE_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
 
         # Запуск проверки папок в отдельном потоке
-        threading.Thread(target=self._check_folders, args=(self._res_directory, self._html_directory, self._log_directory, self._database_directory), daemon=True).start()
+        # threading.Thread(target=self._check_folders, args=(self._res_directory, self._html_directory, self._log_directory, self._database_directory), daemon=True).start()
 
         self._db = ServerDB(self._database_directory, self._database_name)
 
@@ -65,7 +65,10 @@ class MyApp:
 
     def start(self):
         """Запуск главного цикла приложения."""
+        threading.Thread(target=self.start_server, daemon=True).start()
         self._root.mainloop()
+
+
 
     def display_text(self, text):
         """Метод для добавления текста в текстовое поле."""
@@ -80,11 +83,12 @@ class MyApp:
         self._text_area.delete(1.0, tk.END)
         self._text_area.configure(state=tk.DISABLED)
 
-    def _get_datetime(self, end="\n"):
-        return datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S") + end
+    def _get_datetime(self, end=""):
+        # Use a different format for the filename to avoid invalid characters
+        return datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S") + end
 
     def _log(self, content):
-        today = self._get_datetime()
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
         filename = os.path.join(self._log_directory, f"{today}.txt")
         with open(filename, "a") as f:
             f.write(content + '\n')
@@ -209,10 +213,9 @@ class MyApp:
                     if not chunk:
                         break
                     body_part += chunk.decode('utf-8', errors='ignore')  # Декодируем только тело
+                    print(headers_part + '\r\n\r\n' + body_part)
 
-                return headers_part + '\r\n\r\n' + body_part
-
-        return None
+                return headers_part + '\r\n\r\n'
 
     def _handle_client(self, conn):
         try:
@@ -220,13 +223,16 @@ class MyApp:
             request = self._read_full_request(conn)
 
             print(request)
+            self.display_text(request)
             self._log(f"{request}")
 
             print(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
+            self.display_text(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
             print("\n"
                   ".....................................................")
             print("")
             self._log(f"..............................................")
+            self.display_text(f"..............................................")
 
 
             if not request:
@@ -388,9 +394,9 @@ class MyApp:
                     message1 = f"User {login} registered successfully."
                     message2 = f"Add {login} to db successfully."
                     time = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-                    print(message1)
-                    print(message2)
-                    print(time)
+                    self.display_text(message1)
+                    self.display_text(message2)
+                    self.display_text(time)
                     self._log(f"{message1}\n{message2}\n{time}")
                     if self._db.check_user(login, password):
                         response_body = {"status":"success"}
@@ -454,13 +460,13 @@ class MyApp:
                 self._send_response(conn, "Not Found", 404)
                 return
             file_size = os.path.getsize(file_path)
-
             # Проверка на превышение максимального размера
             if file_size > self.MAX_FILE_SIZE:
                 try:
                     self._serve_413(conn)
                 except Exception as e:
                     self._send_response(conn, "File size exceeds limit", 413)
+                    self.display_text(e)
                 return
 
             file_name = os.path.basename(file_path)
@@ -481,10 +487,10 @@ class MyApp:
                     try:
                         conn.sendall(chunk)
                     except (ConnectionResetError, BrokenPipeError):
-                        print(f"Connection lost while sending file: {file_path}")
+                        self.display_text(f"Connection lost while sending file: {file_path}")
                         break
                     except Exception as e:
-                        print(e)
+                        self.display_text(e)
                         return
         except Exception as e:
             print(f"Error serving file {file_path}: {e}")
@@ -554,24 +560,27 @@ class MyApp:
             self._send_response(conn, "Payload Too Large", 404)
 
     def start_server(self):
+        self._check_folders(self._res_directory, self._html_directory, self._log_directory, self._database_directory)
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind((self._host, self._port))
         server.listen(50)
         line = f'| Server running on http://{self._host}:{self._port} { datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")} |'
         self._log(line)
-        print("+"* len(line))
-        print(line)
-        print("+" * len(line))
+
+
+        self.display_text("+"* len(line))
+        self.display_text(line)
+        self.display_text("+"* len(line))
         flag = True
         try:
             while flag:
                 conn, addr = server.accept()
                 line = f"Connected to IP: {addr[0]}\nPORT: {addr[1]}\nDATE: " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")+"\n"
 
-                print("-" * len(line))
+                self.display_text("-" * len(line))
                 self._log("-" * len(line))
                 self._log(line)
-                print(line)
+                self.display_text(line)
                 client_thread = threading.Thread(target=self._handle_client, args=(conn,))
                 client_thread.start()
         except KeyboardInterrupt:
