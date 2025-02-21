@@ -2,3 +2,4 @@
 /logs/
 /.venv/
 /resources/basket/
+/test.py

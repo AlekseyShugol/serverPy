@@ -16,16 +16,22 @@ class ServerGui:
     def __init__(self, config_file_path):
         self._root = tk.Tk()
         self._root.geometry("800x600")
+        self._root.iconbitmap("resources/public/icon.ico")
 
-        # Создаем тулбар
-        self._toolbar = ttk.Frame(self._root)
-        self._toolbar.pack(side=tk.TOP, fill=tk.X)
+        # Создаем меню
+        self._menu = tk.Menu(self._root)
+        self._root.config(menu=self._menu)
 
-        self._clear_button = tk.Button(self._toolbar, text="Clear", command=self.clear_text)
-        self._clear_button.pack(side=tk.LEFT, padx=5, pady=5)
+        # Меню "File"
+        self._file_menu = tk.Menu(self._menu, tearoff=0)
+        self._file_menu.add_command(label="Clear", command=self._clear_text)
+        self._menu.add_cascade(label="File", menu=self._file_menu)
 
-        self._tree_button = tk.Button(self._toolbar, text="Tree", command=self._show_tree)
-        self._tree_button.pack(side=tk.LEFT, padx=5, pady=5)
+        # Меню "View"
+        self._view_menu = tk.Menu(self._menu, tearoff=0)
+        self._view_menu.add_command(label="Tree", command=self._show_tree)
+        self._view_menu.add_command(label="Users")
+        self._menu.add_cascade(label="View", menu=self._view_menu)
 
         # Создаем текстовое поле
         self._text_area = tk.Text(self._root, height=15, width=150)
@@ -57,9 +63,6 @@ class ServerGui:
         self.MAX_REQUEST_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
         self.MAX_FILE_SIZE = 1024 * 1024 * 1024 * self._max_size_gigabytes
 
-        # Запуск проверки папок в отдельном потоке
-        # threading.Thread(target=self._check_folders, args=(self._res_directory, self._html_directory, self._log_directory, self._database_directory), daemon=True).start()
-
         self._db = ServerDB(self._database_directory, self._database_name)
 
         self._root.title(f"Server Manager v{self._version}")
@@ -69,16 +72,14 @@ class ServerGui:
         threading.Thread(target=self.start_server, daemon=True).start()
         self._root.mainloop()
 
-
-
-    def display_text(self, text):
+    def _display_text(self, text):
         """Метод для добавления текста в текстовое поле."""
         self._text_area.configure(state=tk.NORMAL)
         self._text_area.insert(tk.END, f"{text}\n")
         self._text_area.see(tk.END)
         self._text_area.configure(state=tk.DISABLED)
 
-    def clear_text(self):
+    def _clear_text(self):
         """Метод для очистки текстового поля."""
         self._text_area.configure(state=tk.NORMAL)
         self._text_area.delete(1.0, tk.END)
@@ -96,13 +97,13 @@ class ServerGui:
 
     def _check_folders(self, res_path, html_path, log_directory, database_directory):
         for path in [res_path, html_path, log_directory, database_directory]:
-            self.display_text(f'Checking {path}')
+            self._display_text(f'Checking {path}')
             if not os.path.exists(path):
-                self.display_text(f'Folder {path} does not exist')
+                self._display_text(f'Folder {path} does not exist')
                 os.makedirs(path)
-                self.display_text(f'Folder {path} created')
-            self.display_text("OK")
-        self.display_text(self._get_datetime())
+                self._display_text(f'Folder {path} created')
+            self._display_text("OK")
+        self._display_text(self._get_datetime())
 
     def _read_config(self):
         with open(self._config_file_path, 'r') as config_file:
@@ -220,8 +221,9 @@ class ServerGui:
                 else:
                     return headers_part + '\r\n\r\n'
 
-    def _remove_auth_line(self,text):
+    def _remove_auth_line(self, text):
         masked_data = re.sub(r'("password":\s*")[^"]*(")', r'\1****\2', text)
+        masked_data = re.sub(r'("token":\s*")[^"]*(")', r'\1****\2', masked_data)
         return masked_data
 
     def _handle_client(self, conn):
@@ -231,16 +233,16 @@ class ServerGui:
             request_head = self._remove_auth_line(request)
 
             print(request_head)
-            self.display_text(request_head)
+            self._display_text(request_head)
             self._log(f"{request_head}")
 
             print(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
-            self.display_text(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
+            self._display_text(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
             print("\n"
                   ".....................................................")
             print("")
             self._log(f"..............................................")
-            self.display_text(f"..............................................")
+            self._display_text(f"..............................................")
 
 
             if not request:
@@ -402,9 +404,9 @@ class ServerGui:
                     message1 = f"User {login} registered successfully."
                     message2 = f"Add {login} to db successfully."
                     time = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-                    self.display_text(message1)
-                    self.display_text(message2)
-                    self.display_text(time)
+                    self._display_text(message1)
+                    self._display_text(message2)
+                    self._display_text(time)
                     self._log(f"{message1}\n{message2}\n{time}")
                     if self._db.check_user(login, password):
                         response_body = {"status":"success"}
@@ -474,7 +476,7 @@ class ServerGui:
                     self._serve_413(conn)
                 except Exception as e:
                     self._send_response(conn, "File size exceeds limit", 413)
-                    self.display_text(e)
+                    self._display_text(e)
                 return
 
             file_name = os.path.basename(file_path)
@@ -495,10 +497,10 @@ class ServerGui:
                     try:
                         conn.sendall(chunk)
                     except (ConnectionResetError, BrokenPipeError):
-                        self.display_text(f"Connection lost while sending file: {file_path}")
+                        self._display_text(f"Connection lost while sending file: {file_path}")
                         break
                     except Exception as e:
-                        self.display_text(e)
+                        self._display_text(e)
                         return
         except Exception as e:
             print(f"Error serving file {file_path}: {e}")
@@ -574,21 +576,20 @@ class ServerGui:
         server.listen(50)
         line = f'| Server running on http://{self._host}:{self._port} { datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")} |'
         self._log(line)
+        print(line)
 
-
-        self.display_text("+"* len(line))
-        self.display_text(line)
-        self.display_text("+"* len(line))
+        self._display_text("+" * len(line))
+        self._display_text(line)
+        self._display_text("+" * len(line))
         flag = True
         try:
             while flag:
                 conn, addr = server.accept()
                 line = f"Connected to IP: {addr[0]}\nPORT: {addr[1]}\nDATE: " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")+"\n"
-
-                self.display_text("-" * len(line))
+                self._display_text("-" * len(line))
                 self._log("-" * len(line))
                 self._log(line)
-                self.display_text(line)
+                self._display_text(line)
                 client_thread = threading.Thread(target=self._handle_client, args=(conn,))
                 client_thread.start()
         except KeyboardInterrupt:
