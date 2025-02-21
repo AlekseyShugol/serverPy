@@ -30,7 +30,7 @@ class ServerGui:
         # Меню "View"
         self._view_menu = tk.Menu(self._menu, tearoff=0)
         self._view_menu.add_command(label="Tree", command=self._show_tree)
-        self._view_menu.add_command(label="Users")
+        self._view_menu.add_command(label="Users", command=self._show_users)
         self._menu.add_cascade(label="View", menu=self._view_menu)
 
         # Создаем текстовое поле
@@ -71,6 +71,54 @@ class ServerGui:
         """Запуск главного цикла приложения."""
         threading.Thread(target=self.start_server, daemon=True).start()
         self._root.mainloop()
+
+    def _show_users(self):
+        self._user_tree_window = tk.Toplevel(self._root)
+        self._user_tree_window.title("User Role Manager")
+        self._user_tree_window.geometry("900x600")
+
+        frame = tk.Frame(self._user_tree_window)
+        frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        columns = ("ID", "Login", "Role")
+        self._tree = ttk.Treeview(frame, columns=columns, show="headings")
+        for col in columns:
+            self._tree.heading(col, text=col)
+        self._tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=self._tree.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self._tree.configure(yscroll=scrollbar.set)
+
+        self._role_var = tk.StringVar(value="user")
+        role_options = ttk.Combobox(self._user_tree_window, textvariable=self._role_var,
+                                    values=["user", "admin"])
+        role_options.pack(pady=10)
+
+        change_button = tk.Button(self._user_tree_window, text="Change Role", command=self._change_role)
+        change_button.pack(pady=10)
+
+        self._load_users()
+
+    def _load_users(self):
+        for row in self._tree.get_children():
+            self._tree.delete(row)
+        for user in self._db.fetch_users():
+            self._tree.insert("", "end", values=user)
+
+    def _change_role(self):
+        selected_item = self._tree.selection()
+        if selected_item:
+            user_id = self._tree.item(selected_item, "values")[0]
+            new_role = self._role_var.get()
+            self._update_role(user_id, new_role)
+            messagebox.showinfo("Success", "Role updated successfully!")
+        else:
+            messagebox.showwarning("Warning", "Please select a user.")
+
+    def _update_role(self,user_id, new_role):
+        self._db.update_role(user_id, new_role)
+        self._load_users()
 
     def _display_text(self, text):
         """Метод для добавления текста в текстовое поле."""
