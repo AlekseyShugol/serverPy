@@ -10,7 +10,7 @@ class ServerDB:
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 login TEXT NOT NULL UNIQUE,
-                password BLOB NOT NULL,  -- Изменяем тип на BLOB для хранения байтов
+                password BLOB NOT NULL,  
                 role TEXT NOT NULL DEFAULT 'user'
             )
         ''')
@@ -43,18 +43,22 @@ class ServerDB:
             }
         return None  # Если пользователь не найден
 
-    def update_user(self, user_id, login, password, role='user'):
-        self._cursor.execute("SELECT role FROM users WHERE id = ?", (user_id,))
-        current_role = self._cursor.fetchone()
+    # def update_user(self, user_id, login, password, role='user'):
+    #     self._cursor.execute("SELECT role FROM users WHERE id = ?", (user_id,))
+    #     current_role = self._cursor.fetchone()
+    #
+    #     if current_role and current_role[0] == 'admin':
+    #         # Если это администратор, не разрешаем менять логин
+    #         self._cursor.execute("UPDATE users SET password = ?, role = ? WHERE id = ?",
+    #                              (bcrypt.hashpw(password.encode(), bcrypt.gensalt()), role, user_id))
+    #     else:
+    #         self._cursor.execute("UPDATE users SET login = ?, password = ?, role = ? WHERE id = ?",
+    #                              (login, bcrypt.hashpw(password.encode(), bcrypt.gensalt()), role, user_id))
+    #
+    #     self._conn.commit()
 
-        if current_role and current_role[0] == 'admin':
-            # Если это администратор, не разрешаем менять логин
-            self._cursor.execute("UPDATE users SET password = ?, role = ? WHERE id = ?",
-                                 (bcrypt.hashpw(password.encode(), bcrypt.gensalt()), role, user_id))
-        else:
-            self._cursor.execute("UPDATE users SET login = ?, password = ?, role = ? WHERE id = ?",
-                                 (login, bcrypt.hashpw(password.encode(), bcrypt.gensalt()), role, user_id))
-
+    def update_role(self,user_id,new_role):
+        self._cursor.execute("UPDATE users SET role = ? WHERE id = ?",(new_role,user_id))
         self._conn.commit()
 
     def check_user(self, login, password):
@@ -70,6 +74,11 @@ class ServerDB:
     def get_users(self):
         self._cursor.execute('SELECT * FROM users')
         return self._cursor.fetchall()
+
+    def fetch_users(self):
+        self._cursor.execute("SELECT id, login, role FROM users")
+        users = self._cursor.fetchall()
+        return users
 
     def delete_user(self, user_id):
         self._cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
