@@ -9,5 +9,5 @@
     "secret_path": "config/data/secrets.json",
     "database_name": "userData",
     "max_size_gigabytes": 10,
-    "version": "3.1"
+    "version": "3.3"
 }
