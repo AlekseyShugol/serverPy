@@ -1,19 +1,16 @@
-from server import Server
 from check_architecrure import check_system_bitness as check
-from serverGUI import MyApp
-import tkinter as tk
+from serverGUI import ServerGui
+from server import Server
 
 passw = str(input("Enter mode(enter to gui, cli to console>> "))
 
 if __name__ == "__main__":
     bitness = check()
+    config_path = "config/config.json"
     print(bitness)
     if bitness == "64bit" and passw != "cli":
-        app = MyApp("config/config.json")
+        app = ServerGui(config_path)
         app.start()
-    elif passw == "cli":
-        server = Server("config/config.json")
-        server.start()
     else:
-        server = Server("config/config.json")
+        server = Server(config_path)
         server.start()
