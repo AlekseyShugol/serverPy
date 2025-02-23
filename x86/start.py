@@ -14,3 +14,4 @@ if __name__ == "__main__":
     else:
         server = Server(config_path)
         server.start()
+
